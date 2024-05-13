@@ -8,7 +8,7 @@
       Id="VideoDevice" 
       Type="V4L2Video"
       IOMethod=""
-      DeviceName="/dev/video0" >
+      DeviceName="/dev/video2" >
       <DataSources>
         <DataSource Type="Video" Id="Video" PortUsImageOrientation="MF" /> 
       </DataSources>      

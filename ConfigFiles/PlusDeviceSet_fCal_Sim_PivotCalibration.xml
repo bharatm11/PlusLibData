@@ -7,13 +7,13 @@
 vtkStylusCalibrationTest uses this configuration" />
     <Device
       Id="TrackerDevice"
-      Type="FakeTracker"
+      Type="Polhemus"
       AcquisitionRate="50"
       ToolReferenceFrame="Tracker"
       Mode="PivotCalibration"  >
       <DataSources>
-        <DataSource Type="Tool" Id="Reference"  PortName="0" />
-        <DataSource Type="Tool" Id="Stylus"  PortName="1" />
+        <DataSource Type="Tool" Id="Reference"  PortName="1" />
+        <DataSource Type="Tool" Id="Stylus"  PortName="6" />
       </DataSources> 
       <OutputChannels>
         <OutputChannel Id="TrackerStream">

@@ -5,32 +5,35 @@
       Name="fCal: Epiphan framegrabber + NDI Polaris tracker (Probe, Reference, Stylus)"
       Description="Epiphan framegrabber image acquisition + NDI Polaris for tracking" />
 
+
     <Device
-      Id="TrackerDevice"
-      Type="PolarisTracker"
-      SerialPort="3"
-      BaudRate="115200"
-      LocalTimeOffsetSec="0.0" >
-      <DataSources>
-        <DataSource Type="Tool" Id="Tool" RomFile="NdiToolDefinitions/8700339.rom"  />
-        <DataSource Type="Tool" Id="Stylus" RomFile="NdiToolDefinitions/8700340.rom"  />
-        <DataSource Type="Tool" Id="Reference" RomFile="NdiToolDefinitions/8700449.rom"  />
+      Id="TrackerDevice" 
+      Type="Polhemus"
+      ToolReferenceFrame="Tracker" >
+         <DataSources>
+        <DataSource Type="Tool" Id="Reference" PortName="1"  />
+        <DataSource Type="Tool" Id="Stylus" PortName="5"  />
+        <DataSource Type="Tool" Id="Probe" PortName="2"  />
+
       </DataSources>
       <OutputChannels>
         <OutputChannel Id="TrackerStream" >
-          <DataSource Id="Tool"/>
           <DataSource Id="Reference"/>
           <DataSource Id="Stylus"/>
+          <DataSource Id="Probe"/>
         </OutputChannel>
       </OutputChannels>
     </Device>
 
+    
     <Device
       Id="VideoDevice" 
-      Type="Epiphan" >
+      Type="V4L2Video"
+      IOMethod=""
+      DeviceName="/dev/video2" >
       <DataSources>
-        <DataSource Type="Video" Id="Video" PortUsImageOrientation="MF"  />
-      </DataSources>
+        <DataSource Type="Video" Id="Video" PortUsImageOrientation="MF" /> 
+      </DataSources>      
       <OutputChannels>
         <OutputChannel Id="VideoStream" VideoDataSourceId="Video" />
       </OutputChannels>
@@ -50,8 +53,14 @@
   </DataCollection>
 
   <Rendering WorldCoordinateFrame="Tracker">
+    <DisplayableObject Type="Model" ObjectCoordinateFrame="StylusTip" Id="StylusModel" File="Stylus_Example.stl" />
     <DisplayableObject Type="Axes" ObjectCoordinateFrame="Reference" />
     <DisplayableObject Type="Axes" ObjectCoordinateFrame="Tracker" />
+  
+    <DisplayableObject Type="Image" ObjectCoordinateFrame="Image" Id="VideoStream"/>
+    
+    <DisplayableObject Type="Model" ObjectCoordinateFrame="Phantom" Opacity="0.6" File="fCal_1.0.stl"
+    ModelToObjectTransform="1 0 0 -15.0        0 1 0 10.0        0 0 1 -5.0        0 0 0 1" />
   </Rendering>
 
   <PhantomDefinition>
@@ -86,7 +95,9 @@
   </PhantomDefinition>
 
   <fCal
+     
     PhantomModelId="PhantomModel"
+    ReconstructedVolumeId="Volume"
     TransducerModelId="ProbeModel"
     StylusModelId="StylusModel"
     ImageDisplayableObjectId="LiveImage"
@@ -100,25 +111,26 @@
     ReferenceCoordinateFrame="Reference"
     TransducerOriginCoordinateFrame="TransducerOrigin"
     TransducerOriginPixelCoordinateFrame="TransducerOriginPixel"
-    TemporalCalibrationDurationSec="10"
+    TemporalCalibrationDurationSec="10" 
     FixedChannelId="VideoStream" 
     FixedSourceId="Video"
     MovingChannelId="TrackerStream"
     MovingSourceId="ProbeToTracker"
     DefaultSelectedChannelId="TrackedVideoStream" 
+    FreeHandStartupDelaySec="5" 
   />
   
   <vtkPlusPivotCalibrationAlgo
     ObjectMarkerCoordinateFrame="Stylus"
     ReferenceCoordinateFrame="Reference"
-    ObjectPivotPointCoordinateFrame="StylusTip" 
-  />
+    ObjectPivotPointCoordinateFrame="StylusTip" />
 
+  
   <vtkPlusPhantomLandmarkRegistrationAlgo
     PhantomCoordinateFrame="Phantom"
     ReferenceCoordinateFrame="Reference"
-    StylusTipCoordinateFrame="StylusTip" 
-  />
+    StylusTipCoordinateFrame="StylusTip"  />
+
   
   <vtkPhantomLinearObjectRegistrationAlgo
     PhantomCoordinateFrame="Phantom"
@@ -132,4 +144,29 @@
     PhantomCoordinateFrame="Phantom"
     ReferenceCoordinateFrame="Reference" 
   />
+  
+  <VolumeReconstruction OutputSpacing="0.5 0.5 0.5"
+    ClipRectangleOrigin="0 0" ClipRectangleSize="820 616"
+    Interpolation="LINEAR" Optimization="FULL" CompoundingMode="MEAN" FillHoles="OFF" />
+  
+  <PlusOpenIGTLinkServer 
+    MaxNumberOfIgtlMessagesToSend="1" 
+    MaxTimeSpentWithProcessingMs="50" 
+    ListeningPort="18944" 
+    OutputChannelId="TrackerStream" > 
+    <DefaultClientInfo> 
+      <MessageTypes> 
+        <Message Type="TRANSFORM" />
+      </MessageTypes>
+      <TransformNames> 
+        <Transform Name="ReferenceToTracker" />
+        <Transform Name="StylusToTracker" />
+        <Transform Name="ProbeToTracker" />
+        
+
+        <!-- <Transform Name="ReferenceToTracker" />
+        <Transform Name="StylusToTracker" /> -->
+      </TransformNames>
+    </DefaultClientInfo>
+  </PlusOpenIGTLinkServer>
 </PlusConfiguration>
