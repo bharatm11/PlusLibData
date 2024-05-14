@@ -11,9 +11,9 @@
       Type="Polhemus"
       ToolReferenceFrame="Tracker" >
          <DataSources>
-        <DataSource Type="Tool" Id="Reference" PortName="1"  />
-        <DataSource Type="Tool" Id="Stylus" PortName="5"  />
-        <DataSource Type="Tool" Id="Probe" PortName="2"  />
+        <DataSource Type="Tool" Id="Reference" PortName="2"  />
+        <DataSource Type="Tool" Id="Stylus" PortName="3"  />
+        <DataSource Type="Tool" Id="Probe" PortName="1"  />
 
       </DataSources>
       <OutputChannels>

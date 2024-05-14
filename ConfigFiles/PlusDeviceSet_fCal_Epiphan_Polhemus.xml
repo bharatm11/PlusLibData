@@ -3,13 +3,14 @@
     <DeviceSet 
       Name="fCal: Epiphan framegrabber +  Polhemus tracker (Probe, Reference, Stylus)"
       Description="Epiphan framegrabber image acquisition + Polhemus for tracking" />
+    
     <Device
       Id="TrackerDevice" 
       Type="Polhemus" 
       LocalTimeOffsetSec="0.0" 
       ToolReferenceFrame="Tracker" >
       <DataSources>
-        <DataSource Type="Tool" Id="Probe" PortName="1"  />
+        <DataSource Type="Tool" Id="Probe" PortName="5"  />
         <DataSource Type="Tool" Id="Reference" PortName="2"  />
         <DataSource Type="Tool" Id="Stylus" PortName="3"  />
       </DataSources>
@@ -21,20 +22,21 @@
         </OutputChannel>
       </OutputChannels>
     </Device>
+
     <Device
       Id="VideoDevice" 
       Type="V4L2Video"
       IOMethod=""
-      AcquisitionRate="30" 
-      LocalTimeOffsetSec="-0.2976"
       DeviceName="/dev/video2" >
       <DataSources>
-        <DataSource Type="Video" Id="Video" PortUsImageOrientation="UF" /> 
+        <DataSource Type="Video" Id="Video" PortUsImageOrientation="MF" /> 
       </DataSources>      
       <OutputChannels>
         <OutputChannel Id="VideoStream" VideoDataSourceId="Video" />
       </OutputChannels>
     </Device>
+
+
     <Device 
       Id="TrackedVideoDevice" 
       Type="VirtualMixer" >
@@ -47,6 +49,7 @@
       </OutputChannels>
     </Device>
   </DataCollection>
+
   <CoordinateDefinitions>
     <Transform From="Image" To="TransducerOriginPixel"
       Matrix="1 0 0 -410
@@ -55,6 +58,7 @@
               0 0 0 1"
       Date="2011.12.06 17:57:00" Error="0.0" />    
   </CoordinateDefinitions> 
+
   <Rendering WorldCoordinateFrame="Reference">
     <DisplayableObject Type="Model" ObjectCoordinateFrame="TransducerOrigin" Id="ProbeModel"
       File="Probe_L14-5_38.stl"
@@ -75,7 +79,8 @@
         0 0 0 1" />
     <DisplayableObject Type="Image" ObjectCoordinateFrame="Image" Id="LiveImage"/>
   </Rendering>
-<Segmentation
+
+  <Segmentation
     ApproximateSpacingMmPerPixel="0.078"
     MorphologicalOpeningCircleRadiusMm="0.27"
     MorphologicalOpeningBarSizeMm="2.0"
@@ -91,7 +96,9 @@
     CollinearPointsMaxDistanceFromLineMm="0.6"
     UseOriginalImageIntensityForDotIntensityScore="FALSE"
     NumberOfMaximumFiducialPointCandidates="20"
-  />  <PhantomDefinition>
+  />  
+
+  <PhantomDefinition>
     <Description
       Name="fCAL"
       Type="Multi-N"
@@ -125,7 +132,7 @@
         <Landmark Name="#6" Position="-34.3 -5.0 20.0" />
         <Landmark Name="#7" Position="-34.3 -5.0 0.0" />
         <Landmark Name="#8" Position="-34.3 45.0 0.0" />
-      </Landmarks>      
+      </Landmarks> 
       <Planes>
         <Plane Name="Superior" BasePoint="5.5 3.0 35.0" EndPoint1="135.0 3.0 35.0" EndPoint2="135.0 55.0 35.0" />
         <Plane Name="Inferior" BasePoint="5.5 55.0 0.0" EndPoint1="135.0 55.0 0.0" EndPoint2="135.0 5.5 0.0" />
@@ -145,12 +152,14 @@
         <Reference Name="#6" Position="-34.3 -5.0 20.0" />
         <Reference Name="#7" Position="-34.3 -5.0 0.0" />
         <Reference Name="#8" Position="-34.3 45.0 0.0" />
-      </References>
+      </References>     
     </Geometry>
   </PhantomDefinition>
-<VolumeReconstruction OutputSpacing="0.5 0.5 0.5"
+
+  <VolumeReconstruction OutputSpacing="0.5 0.5 0.5"
     ClipRectangleOrigin="0 0" ClipRectangleSize="820 616"
     Interpolation="LINEAR" Optimization="FULL" CompoundingMode="MEAN" FillHoles="OFF" />
+  
   <fCal
     PhantomModelId="PhantomModel"
     ReconstructedVolumeId="Volume"
@@ -174,19 +183,39 @@
     MovingSourceId="ProbeToTracker"
     DefaultSelectedChannelId="TrackedVideoStream" 
     FreeHandStartupDelaySec="5" />
+
   <vtkPlusPivotCalibrationAlgo
     ObjectMarkerCoordinateFrame="Stylus"
     ReferenceCoordinateFrame="Reference"
     ObjectPivotPointCoordinateFrame="StylusTip" />
+
   <vtkPlusPhantomLandmarkRegistrationAlgo
     PhantomCoordinateFrame="Phantom"
     ReferenceCoordinateFrame="Reference"
-    StylusTipCoordinateFrame="StylusTip" 
-    DetectionTimeSec="1.0"
-    StylusTipMaximumDisplacementThresholdMm="1.8" />
+    StylusTipCoordinateFrame="StylusTip" />
+
   <vtkPlusProbeCalibrationAlgo
     ImageCoordinateFrame="Image"
     ProbeCoordinateFrame="Probe"
     PhantomCoordinateFrame="Phantom"
     ReferenceCoordinateFrame="Reference" />
+
+  <PlusOpenIGTLinkServer 
+    MaxNumberOfIgtlMessagesToSend="1" 
+    MaxTimeSpentWithProcessingMs="50" 
+    ListeningPort="18944" 
+    OutputChannelId="TrackerStream" > 
+    <DefaultClientInfo> 
+      <MessageTypes> 
+        <Message Type="TRANSFORM" />
+      </MessageTypes>
+      <TransformNames> 
+        <Transform Name="ReferenceToTracker" />
+        <Transform Name="StylusToTracker" />
+        <Transform Name="ProbeToTracker" />
+      </TransformNames>
+    </DefaultClientInfo>
+  </PlusOpenIGTLinkServer>  
+
+  
 </PlusConfiguration>
