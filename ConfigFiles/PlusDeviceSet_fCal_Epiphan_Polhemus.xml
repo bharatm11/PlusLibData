@@ -25,9 +25,7 @@
 
     <Device
       Id="VideoDevice" 
-      Type="V4L2Video"
-      IOMethod=""
-      DeviceName="/dev/video2" >
+      Type="Epiphan" >
       <DataSources>
         <DataSource Type="Video" Id="Video" PortUsImageOrientation="MF" /> 
       </DataSources>      
@@ -35,7 +33,6 @@
         <OutputChannel Id="VideoStream" VideoDataSourceId="Video" />
       </OutputChannels>
     </Device>
-
 
     <Device 
       Id="TrackedVideoDevice" 
@@ -201,7 +198,7 @@
     ReferenceCoordinateFrame="Reference" />
 
   <PlusOpenIGTLinkServer 
-    MaxNumberOfIgtlMessagesToSend="1" 
+    MaxNumberOfIgtlMessagesToSend="50000" 
     MaxTimeSpentWithProcessingMs="50" 
     ListeningPort="18944" 
     OutputChannelId="TrackerStream" > 

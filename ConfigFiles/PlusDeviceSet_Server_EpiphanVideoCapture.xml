@@ -36,7 +36,7 @@
   </CoordinateDefinitions>
   
   <PlusOpenIGTLinkServer 
-    MaxNumberOfIgtlMessagesToSend="1" 
+    MaxNumberOfIgtlMessagesToSend="50000" 
     MaxTimeSpentWithProcessingMs="50" 
     ListeningPort="18944" 
     SendValidTransformsOnly="true" 
