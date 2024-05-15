@@ -11,17 +11,15 @@
       ToolReferenceFrame="Tracker" 
       Mode="PivotCalibration">
       <DataSources>
-        <DataSource Type="Tool" Id="Reference" PortName="1"  />
-        <DataSource Type="Tool" Id="Stylus" PortName="5"  />
-        <DataSource Type="Tool" Id="Probe" PortName="2"  />
-        <DataSource Type="Tool" Id="Phantom" PortName="6"  />
+        <DataSource Type="Tool" Id="Reference" PortName="2"  />
+        <DataSource Type="Tool" Id="Stylus" PortName="3"  />
+        <DataSource Type="Tool" Id="Probe" PortName="5"  />
       </DataSources>
       <OutputChannels>
         <OutputChannel Id="TrackerStream" >
           <DataSource Id="Reference"/>
           <DataSource Id="Stylus"/>
           <DataSource Id="Probe"/>
-          <DataSource Id="Phantom"/>
         </OutputChannel>
       </OutputChannels>
     </Device>
