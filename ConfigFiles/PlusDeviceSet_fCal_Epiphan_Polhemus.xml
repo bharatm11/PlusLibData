@@ -72,8 +72,8 @@
     ApproximateSpacingMmPerPixel="0.078"
     MorphologicalOpeningCircleRadiusMm="0.27"
     MorphologicalOpeningBarSizeMm="2.0"
-    ClipRectangleOrigin="27 27" 
-    ClipRectangleSize="766 562" 
+    ClipRectangleOrigin="55 68" 
+    ClipRectangleSize="650 650" 
     MaxLinePairDistanceErrorPercent="10"
     AngleToleranceDegrees="10"
     MaxAngleDifferenceDegrees="10"
@@ -145,7 +145,7 @@
   </PhantomDefinition>
 
   <VolumeReconstruction OutputSpacing="0.5 0.5 0.5"
-    ClipRectangleOrigin="0 0" ClipRectangleSize="820 616"
+    ClipRectangleOrigin="55 68" ClipRectangleSize="650 650"
     Interpolation="LINEAR" Optimization="FULL" CompoundingMode="MEAN" FillHoles="OFF" />
   
   <fCal
