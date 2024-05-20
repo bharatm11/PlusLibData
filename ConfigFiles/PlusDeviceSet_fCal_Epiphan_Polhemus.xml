@@ -7,6 +7,7 @@
     <Device
       Id="TrackerDevice" 
       Type="Polhemus" 
+      FTTMode="0"
       LocalTimeOffsetSec="0.0" 
       ToolReferenceFrame="Tracker" >
       <DataSources>
