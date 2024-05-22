@@ -1,11 +1,11 @@
 <PlusConfiguration version="2.3" PlusRevision="Plus-2.9.0.dc1df737 - Win64">
   <DataCollection StartupDelaySec="1">
     <DeviceSet Name="fCal: Epiphan framegrabber +  Polhemus tracker (Probe, Reference, Stylus)" Description="Epiphan framegrabber image acquisition + Polhemus for tracking" />
-    <Device Id="TrackerDevice" Type="Polhemus" FTTMode="0" ToolReferenceFrame="Tracker">
+    <Device Id="TrackerDevice" Type="Polhemus" LocalTimeOffsetSec="0.0667801" ToolReferenceFrame="Tracker" FTTMode="0">
       <DataSources>
-        <DataSource Type="Tool" Id="Probe" PortName="5"/>
-        <DataSource Type="Tool" Id="Reference" PortName="2"/>
-        <DataSource Type="Tool" Id="Stylus" PortName="3"/>
+        <DataSource Type="Tool" Id="Probe" PortName="5" BufferSize="150" />
+        <DataSource Type="Tool" Id="Reference" PortName="6" BufferSize="150" />
+        <DataSource Type="Tool" Id="Stylus" PortName="3" BufferSize="150" />
       </DataSources>
       <OutputChannels>
         <OutputChannel Id="TrackerStream">
@@ -16,9 +16,9 @@
       </OutputChannels>
       <Parameters />
     </Device>
-    <Device Id="VideoDevice" Type="Epiphan">
+    <Device Id="VideoDevice" Type="Epiphan" ClipRectangleOrigin="-1 -1" ClipRectangleSize="-1 -1">
       <DataSources>
-        <DataSource Type="Video" Id="Video" PortUsImageOrientation="MF"/>
+        <DataSource Type="Video" Id="Video" PortUsImageOrientation="UF" BufferSize="150" />
       </DataSources>
       <OutputChannels>
         <OutputChannel Id="VideoStream" VideoDataSourceId="Video" />
@@ -36,6 +36,43 @@
       <Parameters />
     </Device>
   </DataCollection>
+  <CoordinateDefinitions>
+    <Transform From="Image" To="Probe"
+      Matrix="
+        -0.00327579	0.129994	-0.0190668	116.051
+        0.112728	-0.00359234	0.0137005	-21.7797
+        0.0133488	-0.020999	-0.120377	3.81563
+        0	0	0	1"
+       Error="2.47115" Date="052124_035337" />
+    <Transform From="Image" To="TransducerOriginPixel"
+      Matrix="
+        1	0	0	-410
+        0	1	0	5
+        0	0	1	0
+        0	0	0	1"
+       Date="2011.12.06 17:57:00" />
+    <Transform From="Phantom" To="Reference"
+      Matrix="
+        -0.052828	0.0799415	-0.995399	23.0387
+        -0.0766798	-0.994172	-0.0757735	38.3998
+        -0.995655	0.0723241	0.05865	112.772
+        0	0	0	1"
+       Error="13.3229" Date="052124_033620" />
+    <Transform From="StylusTip" To="Stylus"
+      Matrix="
+        0.0572192	-0.113404	0.9919	158.116
+        0.99834	0	-0.0575907	-9.18039
+        0.00653102	0.993549	0.113216	18.0475
+        0	0	0	1"
+       Error="2.78509" Date="052124_033258" />
+    <Transform From="TransducerOriginPixel" To="TransducerOrigin"
+      Matrix="
+        0.112404	0	0	0
+        0	0.132718	0	0
+        0	0	0.122646	0
+        0	0	0	1"
+       Date="052124_035338" />
+  </CoordinateDefinitions>
   <Rendering WorldCoordinateFrame="Reference" DisplayedImageOrientation="MFA">
     <DisplayableObject Type="Model" ObjectCoordinateFrame="TransducerOrigin" Id="ProbeModel" File="Probe_L14-5_38.stl"
       ModelToObjectTransform="
@@ -59,11 +96,11 @@
     <DisplayableObject Type="Image" ObjectCoordinateFrame="Image" Id="LiveImage" />
   </Rendering>
   <Segmentation
-    ApproximateSpacingMmPerPixel="0.121601"
-    MorphologicalOpeningCircleRadiusMm="0.27"
+    ApproximateSpacingMmPerPixel="0.121667"
+    MorphologicalOpeningCircleRadiusMm="0.57"
     MorphologicalOpeningBarSizeMm="2"
-    ClipRectangleOrigin="55 68"
-    ClipRectangleSize="793 661"
+    ClipRectangleOrigin="98 64"
+    ClipRectangleSize="899 677"
     MaxLinePairDistanceErrorPercent="10"
     AngleToleranceDegrees="10"
     MaxAngleDifferenceDegrees="10"
@@ -125,8 +162,8 @@
   </PhantomDefinition>
   <VolumeReconstruction
     OutputSpacing="0.5 0.5 0.5"
-    ClipRectangleOrigin="55 68"
-    ClipRectangleSize="650 650"
+    ClipRectangleOrigin="98 64"
+    ClipRectangleSize="899 677"
     Interpolation="LINEAR"
     Optimization="FULL"
     CompoundingMode="MEAN"
@@ -137,9 +174,9 @@
     TransducerModelId="ProbeModel"
     StylusModelId="StylusModel"
     ImageDisplayableObjectId="LiveImage"
-    NumberOfCalibrationImagesToAcquire="400"
-    NumberOfValidationImagesToAcquire="200"
-    NumberOfStylusCalibrationPointsToAcquire="500"
+    NumberOfCalibrationImagesToAcquire="200"
+    NumberOfValidationImagesToAcquire="100"
+    NumberOfStylusCalibrationPointsToAcquire="200"
     RecordingIntervalMs="100"
     MaxTimeSpentWithProcessingMs="70"
     ImageCoordinateFrame="Image"
@@ -155,31 +192,7 @@
     DefaultSelectedChannelId="TrackedVideoStream"
     FreeHandStartupDelaySec="5" />
   <vtkPlusPivotCalibrationAlgo ObjectMarkerCoordinateFrame="Stylus" ReferenceCoordinateFrame="Reference" ObjectPivotPointCoordinateFrame="StylusTip" />
-  <vtkPlusPhantomLandmarkRegistrationAlgo PhantomCoordinateFrame="Phantom" ReferenceCoordinateFrame="Reference" StylusTipCoordinateFrame="StylusTip" />
+  <vtkPlusPhantomLandmarkRegistrationAlgo PhantomCoordinateFrame="Phantom" ReferenceCoordinateFrame="Reference" StylusTipCoordinateFrame="StylusTip" DetectionTimeSec="1.0" StylusTipMaximumDisplacementThresholdMm="1.8" />
   <vtkPlusProbeCalibrationAlgo ImageCoordinateFrame="Image" ProbeCoordinateFrame="Probe" PhantomCoordinateFrame="Phantom" ReferenceCoordinateFrame="Reference" />
-  <PlusOpenIGTLinkServer
-    MaxNumberOfIgtlMessagesToSend="10"
-    MaxTimeSpentWithProcessingMs="50"
-    ListeningPort="18944"
-    MissingInputGracePeriodSec="5.0"
-    SendValidTransformsOnly="TRUE"
-    OutputChannelId="TrackedVideoStream">
-    <DefaultClientInfo>
-      <MessageTypes>
-        <Message Type="IMAGE" />
-        <Message Type="TRANSFORM" />
-      </MessageTypes>
-      <ImageNames>
-        <Image Name="Image" EmbeddedTransformToFrame="Image" />
-      </ImageNames>
-      <TransformNames>
-        <Transform Name="ImageToReference" />
-        <Transform Name="ProbeToReference" />
-        <Transform Name="ReferenceToTracker" />
-        <Transform Name="ProbeToTracker" />
-        <Transform Name="TransducerOriginToReference" />
-      </TransformNames>
-    </DefaultClientInfo>
-  </PlusOpenIGTLinkServer>
-  <vtkPlusTemporalCalibrationAlgo ClipRectangleOrigin="55 68" ClipRectangleSize="793 661" />
+  <vtkPlusTemporalCalibrationAlgo ClipRectangleOrigin="98 64" ClipRectangleSize="899 677" />
 </PlusConfiguration>
