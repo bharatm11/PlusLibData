@@ -1,6 +1,6 @@
 <PlusConfiguration version="2.3" PlusRevision="Plus-2.9.0.dc1df737 - Win64">
   <DataCollection StartupDelaySec="1">
-    <DeviceSet Name="fCal: Epiphan framegrabber +  Polhemus tracker (Probe, Reference, Stylus)" Description="Epiphan framegrabber image acquisition + Polhemus for tracking" />
+    <DeviceSet Name="fCal: Epiphan framegrabber +  Polhemus tracker (Probe, Reference, Stylus) MindRay" Description="Epiphan framegrabber image acquisition + Polhemus for tracking" />
     <Device Id="TrackerDevice" Type="Polhemus" LocalTimeOffsetSec="0.0667801" ToolReferenceFrame="Tracker" FTTMode="0">
       <DataSources>
         <DataSource Type="Tool" Id="Probe" PortName="5" BufferSize="150" />
@@ -40,48 +40,41 @@
       Type="VirtualCapture"
       BaseFilename="Recording.igs.mhd"
       EnableCapturingOnStart="FALSE"
-      RequestedFrameRate="15"
-      EnableCapturing="FALSE"
-      EnableFileCompression="FALSE"
-      EnableCaptureOnStart="FALSE">
+      RequestedFrameRate="15" >
       <InputChannels>
         <InputChannel Id="TrackedVideoStream" />
       </InputChannels>
-      <Parameters />
     </Device>
     <Device
       Id="VolumeReconstructorDevice"
       Type="VirtualVolumeReconstructor"
       OutputVolDeviceName="Volume_Reference"
-      EnableReconstruction="FALSE"
-      ImageCoordinateFrame="Image"
-      ReferenceCoordinateFrame="Reference">
+      EnableReconstruction="FALSE" >
       <InputChannels>
         <InputChannel Id="TrackedVideoStream" />
       </InputChannels>
       <VolumeReconstruction
-        ImageCoordinateFrame="Image"
-        ReferenceCoordinateFrame="Reference"
-        CompoundingMode="MEAN"
-        Interpolation="LINEAR"
-        Optimization="FULL"
-        NumberOfThreads="2"
-        ClipRectangleOrigin="287 133"
-        ClipRectangleSize="732 489"
-        PixelRejectionThreshold="1"
+        ImageCoordinateFrame="Image" ReferenceCoordinateFrame="Reference"
+        CompoundingMode="MEAN" Interpolation="LINEAR"
+        Optimization="FULL" NumberOfThreads="2"
+        ClipRectangleOrigin="98 64" ClipRectangleSize="899 677" PixelRejectionThreshold="1"
         OutputSpacing="0.5 0.5 0.5"
-        FillHoles="ON"
-        OutputOrigin="0 0 0"
-        OutputExtent="0 0 0 0 0 0">
+        FillHoles="ON" >
         <HoleFilling>
           <HoleFillingElement Type="GAUSSIAN" Size="5" Stdev="0.6667" MinimumKnownVoxelsRatio="0.50001" />
           <HoleFillingElement Type="STICK" StickLengthLimit="9" NumberOfSticksToUse="1" />
         </HoleFilling>
       </VolumeReconstruction>
-      <Parameters />
     </Device>
   </DataCollection>
   <CoordinateDefinitions>
+    <Transform From="Image" To="Probe"
+      Matrix="
+        -0.00327579	0.129994	-0.0190668	116.051
+        0.112728	-0.00359234	0.0137005	-21.7797
+        0.0133488	-0.020999	-0.120377	3.81563
+        0	0	0	1"
+       Error="2.47115" Date="052124_035337" />
     <Transform From="Image" To="TransducerOriginPixel"
       Matrix="
         1	0	0	-410
@@ -91,18 +84,25 @@
        Date="2011.12.06 17:57:00" />
     <Transform From="Phantom" To="Reference"
       Matrix="
-        0.00561527	0.113209	-0.993555	5.14545
-        -0.00686369	-0.993543	-0.113246	25.1517
-        -0.999961	0.00745537	-0.00480199	111.118
+        -0.052828	0.0799415	-0.995399	23.0387
+        -0.0766798	-0.994172	-0.0757735	38.3998
+        -0.995655	0.0723241	0.05865	112.772
         0	0	0	1"
-       Error="2.05006" Date="052524_002747" />
+       Error="13.3229" Date="052124_033620" />
     <Transform From="StylusTip" To="Stylus"
       Matrix="
-        0.133094	-0.228976	0.96429	166.634
-        0.990609	0	-0.136727	-23.6271
-        0.0313071	0.973432	0.226826	39.1967
+        0.0572192	-0.113404	0.9919	158.116
+        0.99834	0	-0.0575907	-9.18039
+        0.00653102	0.993549	0.113216	18.0475
         0	0	0	1"
-       Error="0.966057" Date="052524_002453" />
+       Error="2.78509" Date="052124_033258" />
+    <Transform From="TransducerOriginPixel" To="TransducerOrigin"
+      Matrix="
+        0.112404	0	0	0
+        0	0.132718	0	0
+        0	0	0.122646	0
+        0	0	0	1"
+       Date="052124_035338" />
   </CoordinateDefinitions>
   <Rendering WorldCoordinateFrame="Reference" DisplayedImageOrientation="MFA">
     <DisplayableObject Type="Model" ObjectCoordinateFrame="TransducerOrigin" Id="ProbeModel" File="Probe_L14-5_38.stl"
@@ -130,8 +130,8 @@
     ApproximateSpacingMmPerPixel="0.121667"
     MorphologicalOpeningCircleRadiusMm="0.57"
     MorphologicalOpeningBarSizeMm="2"
-    ClipRectangleOrigin="287 133"
-    ClipRectangleSize="732 489"
+    ClipRectangleOrigin="98 64"
+    ClipRectangleSize="899 677"
     MaxLinePairDistanceErrorPercent="10"
     AngleToleranceDegrees="10"
     MaxAngleDifferenceDegrees="10"
@@ -193,8 +193,8 @@
   </PhantomDefinition>
   <VolumeReconstruction
     OutputSpacing="0.5 0.5 0.5"
-    ClipRectangleOrigin="287 133"
-    ClipRectangleSize="732 489"
+    ClipRectangleOrigin="98 64"
+    ClipRectangleSize="899 677"
     Interpolation="LINEAR"
     Optimization="FULL"
     CompoundingMode="MEAN"
@@ -225,7 +225,8 @@
   <vtkPlusPivotCalibrationAlgo ObjectMarkerCoordinateFrame="Stylus" ReferenceCoordinateFrame="Reference" ObjectPivotPointCoordinateFrame="StylusTip" />
   <vtkPlusPhantomLandmarkRegistrationAlgo PhantomCoordinateFrame="Phantom" ReferenceCoordinateFrame="Reference" StylusTipCoordinateFrame="StylusTip" DetectionTimeSec="1.0" StylusTipMaximumDisplacementThresholdMm="1.8" />
   <vtkPlusProbeCalibrationAlgo ImageCoordinateFrame="Image" ProbeCoordinateFrame="Probe" PhantomCoordinateFrame="Phantom" ReferenceCoordinateFrame="Reference" />
-  <vtkPlusTemporalCalibrationAlgo ClipRectangleOrigin="287 133" ClipRectangleSize="732 489" />
+  <vtkPlusTemporalCalibrationAlgo ClipRectangleOrigin="98 64" ClipRectangleSize="899 677" />
+  
   <PlusOpenIGTLinkServer
     MaxNumberOfIgtlMessagesToSend="10"
     MaxTimeSpentWithProcessingMs="50"
@@ -251,4 +252,5 @@
       </TransformNames>
     </DefaultClientInfo>
   </PlusOpenIGTLinkServer>
+
 </PlusConfiguration>

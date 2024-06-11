@@ -1,7 +1,7 @@
 <PlusConfiguration version="2.3" PlusRevision="Plus-2.9.0.dc1df737 - Win64">
   <DataCollection StartupDelaySec="1">
     <DeviceSet Name="fCal: Epiphan framegrabber +  Polhemus tracker (Probe, Reference, Stylus) NC" Description="Epiphan framegrabber image acquisition + Polhemus for tracking" />
-    <Device Id="TrackerDevice" Type="Polhemus" ToolReferenceFrame="Tracker" FTTMode="0">
+    <Device Id="TrackerDevice" Type="Polhemus" LocalTimeOffsetSec="0.0667801" ToolReferenceFrame="Tracker" FTTMode="0">
       <DataSources>
         <DataSource Type="Tool" Id="Probe" PortName="5" BufferSize="150" />
         <DataSource Type="Tool" Id="Reference" PortName="6" BufferSize="150" />
@@ -82,6 +82,13 @@
     </Device>
   </DataCollection>
   <CoordinateDefinitions>
+    <Transform From="Image" To="Probe"
+      Matrix="
+        0.000681427	0.229017	0.00462873	73.3558
+        -0.180609	-0.0314265	0.137905	179.876
+        0.136226	0.0179081	0.182812	-90.2537
+        0	0	0	1"
+       Error="3.87976" Date="052824_172949" />
     <Transform From="Image" To="TransducerOriginPixel"
       Matrix="
         1	0	0	-410
@@ -89,6 +96,27 @@
         0	0	1	0
         0	0	0	1"
        Date="2011.12.06 17:57:00" />
+    <Transform From="Phantom" To="Reference"
+      Matrix="
+        0.00561527	0.113209	-0.993555	5.14545
+        -0.00686369	-0.993543	-0.113246	25.1517
+        -0.999961	0.00745537	-0.00480199	111.118
+        0	0	0	1"
+       Error="2.05006" Date="052524_002747" />
+    <Transform From="StylusTip" To="Stylus"
+      Matrix="
+        0.133094	-0.228976	0.96429	166.634
+        0.990609	0	-0.136727	-23.6271
+        0.0313071	0.973432	0.226826	39.1967
+        0	0	0	1"
+       Error="0.966057" Date="052524_002453" />
+    <Transform From="TransducerOriginPixel" To="TransducerOrigin"
+      Matrix="
+        0.20999	0	0	0
+        0	0.246655	0	0
+        0	0	0.22904	0
+        0	0	0	1"
+       Date="052824_172949" />
   </CoordinateDefinitions>
   <Rendering WorldCoordinateFrame="Reference" DisplayedImageOrientation="MFA">
     <DisplayableObject Type="Model" ObjectCoordinateFrame="TransducerOrigin" Id="ProbeModel" File="Probe_L14-5_38.stl"
@@ -113,8 +141,8 @@
     <DisplayableObject Type="Image" ObjectCoordinateFrame="Image" Id="LiveImage" />
   </Rendering>
   <Segmentation
-    ApproximateSpacingMmPerPixel="0.201726"
-    MorphologicalOpeningCircleRadiusMm="0.27"
+    ApproximateSpacingMmPerPixel="0.203115"
+    MorphologicalOpeningCircleRadiusMm="0.37"
     MorphologicalOpeningBarSizeMm="2"
     ClipRectangleOrigin="287 133"
     ClipRectangleSize="732 489"
