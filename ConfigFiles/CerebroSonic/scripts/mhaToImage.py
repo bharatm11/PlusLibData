@@ -1,115 +1,154 @@
-# This script reads a .mha sequence file, processes it to segment  out noise using simple 
-# thresholding, and saves the edited frames into a new sequence.
-
-
 import SimpleITK as sitk
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from matplotlib.widgets import Button
-import shutil
 
 class MhaSlideshow:
     def __init__(self, file_path, interval=10):
-        # Store the original .mha file path
         self.original_file_path = file_path
-        # Read the .mha file
         self.image = sitk.ReadImage(file_path)
-        # Convert the image to a numpy array
         self.image_array = sitk.GetArrayFromImage(self.image)
-        # Get the number of frames
         self.num_frames = self.image_array.shape[0]
         self.current_frame = 0
         self.edited_image_array = np.copy(self.image_array)
         self.interval = interval
+        self.paused = False
+        self.points = []
 
-        # Process all frames
-        self.process_all_frames()
-
-        # Set up the plot with two subplots
         self.fig, (self.ax1, self.ax2) = plt.subplots(1, 2)
         self.img1 = self.ax1.imshow(self.image_array[self.current_frame], cmap='gray')
         self.img2 = self.ax2.imshow(self.edited_image_array[self.current_frame], cmap='gray')
-        self.ax1.set_title(f'Original Frame {self.current_frame + 1}')
+        self.ax1.set_title('Select origin and two radius points for the fan shape region')
         self.ax2.set_title(f'Edited Frame {self.current_frame + 1}')
         self.ax1.axis('off')
         self.ax2.axis('off')
 
-        # Add a button for saving
         self.save_button_ax = self.fig.add_axes([0.81, 0.05, 0.1, 0.075])
         self.save_button = Button(self.save_button_ax, 'Save')
         self.save_button.on_clicked(self.save_image)
 
-        # Set up the animation
+        self.pause_button_ax = self.fig.add_axes([0.81, 0.15, 0.1, 0.075])
+        self.pause_button = Button(self.pause_button_ax, 'Pause')
+        self.pause_button.on_clicked(self.toggle_pause)
+
+        self.prev_button_ax = self.fig.add_axes([0.81, 0.25, 0.1, 0.075])
+        self.prev_button = Button(self.prev_button_ax, 'Previous')
+        self.prev_button.on_clicked(self.prev_frame)
+
+        self.next_button_ax = self.fig.add_axes([0.81, 0.35, 0.1, 0.075])
+        self.next_button = Button(self.next_button_ax, 'Next')
+        self.next_button.on_clicked(self.next_frame)
+
+        self.ax1.figure.canvas.mpl_connect('button_press_event', self.on_click)
         self.ani = FuncAnimation(self.fig, self.update_frame, interval=self.interval, blit=False)
         
         plt.show()
 
     def process_all_frames(self):
-        for i in range(self.num_frames):
-            frame = self.image_array[i]
+        if len(self.points) == 3:
+            for i in range(self.num_frames):
+                frame = self.image_array[i]
 
-            # Convert to grayscale if not already
-            if len(frame.shape) == 3 and frame.shape[2] == 3:
-                gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            else:
-                gray_image = frame
+                if len(frame.shape) == 3 and frame.shape[2] == 3:
+                    gray_image = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                else:
+                    gray_image = frame
 
-            # Apply Gaussian smoothing
-            smoothed_image = cv2.GaussianBlur(gray_image, (5, 5), 2)
+                mask = self.create_fan_mask(frame.shape)
+                masked_image = np.bitwise_and(gray_image, mask)
 
-            # Binarize the image using Otsu's thresholding
-            _, binary_image = cv2.threshold(smoothed_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+                self.edited_image_array[i] = masked_image
 
-            # Detect edges using Sobel, Canny, and Prewitt methods
-            sobel_edges = cv2.Sobel(smoothed_image, cv2.CV_64F, 1, 1, ksize=3)
-            sobel_edges = np.uint8(np.absolute(sobel_edges))
 
-            canny_edges = cv2.Canny(smoothed_image, 100, 200)
+    def create_fan_mask(self, shape):
+        mask = np.zeros(shape, dtype=np.uint8)
+        origin = self.points[0]
+        start_point = self.points[1]
+        end_point = self.points[2]
 
-            prewitt_kx = np.array([[1, 0, -1], [1, 0, -1], [1, 0, -1]])
-            prewitt_ky = np.array([[1, 1, 1], [0, 0, 0], [-1, -1, -1]])
-            prewitt_edges_x = cv2.filter2D(smoothed_image, -1, prewitt_kx)
-            prewitt_edges_y = cv2.filter2D(smoothed_image, -1, prewitt_ky)
-            prewitt_edges = prewitt_edges_x + prewitt_edges_y
+        axes = (int(np.linalg.norm(np.array(start_point) - np.array(origin))), 
+                int(np.linalg.norm(np.array(end_point) - np.array(origin))))
+        angle = 0
+        start_angle = np.degrees(np.arctan2(start_point[1] - origin[1], start_point[0] - origin[0]))
+        end_angle = np.degrees(np.arctan2(end_point[1] - origin[1], end_point[0] - origin[0]))
 
-            # Combine edges
-            combined_edges = np.bitwise_or(sobel_edges, canny_edges)
-            combined_edges = np.bitwise_or(combined_edges, prewitt_edges)
+        cv2.ellipse(mask, origin, axes, angle, start_angle, end_angle, 255, -1)
+        return mask
 
-            # Combine the binary image with the combined edges
-            combined_image = np.bitwise_or(binary_image, combined_edges)
+    def draw_fan_shape(self, frame):
+        origin = self.points[0]
+        start_point = self.points[1]
+        end_point = self.points[2]
 
-            # Mask the original grayscale image with the binary image
-            masked_image = gray_image.copy()
-            masked_image[binary_image == 0] = 0
+        if len(frame.shape) == 2:  # Grayscale image
+            frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
 
-            # Update the edited image array
-            self.edited_image_array[i] = masked_image
+        axes = (int(np.linalg.norm(np.array(start_point) - np.array(origin))), 
+                int(np.linalg.norm(np.array(end_point) - np.array(origin))))
+        angle = 0
+        start_angle = np.degrees(np.arctan2(start_point[1] - origin[1], start_point[0] - origin[0]))
+        end_angle = np.degrees(np.arctan2(end_point[1] - origin[1], end_point[0] - origin[0]))
+
+        cv2.ellipse(frame, origin, axes, angle, start_angle, end_angle, (0, 165, 255), 2)
+        return frame
 
     def update_frame(self, *args):
-        self.current_frame = (self.current_frame + 1) % self.num_frames
-        self.img1.set_data(self.image_array[self.current_frame])
+        if not self.paused:
+            self.current_frame = (self.current_frame + 1) % self.num_frames
+        
+        original_frame = self.image_array[self.current_frame]
+        if len(self.points) == 3:
+            original_frame_with_fan = self.draw_fan_shape(np.copy(original_frame))
+        else:
+            original_frame_with_fan = original_frame
+        
+        self.img1.set_data(original_frame_with_fan)
         self.img2.set_data(self.edited_image_array[self.current_frame])
         self.ax1.set_title(f'Original Frame {self.current_frame + 1}')
         self.ax2.set_title(f'Edited Frame {self.current_frame + 1}')
         self.fig.canvas.draw_idle()
 
     def save_image(self, event):
-        # Create a new file name for the edited .mha file
         edited_file_path = self.original_file_path.replace('.mha', '_edited.mha')
-
-        # Convert the numpy array back to a SimpleITK image
         new_image = sitk.GetImageFromArray(self.edited_image_array)
-        # Copy all metadata from the original image to the new image
         for key in self.image.GetMetaDataKeys():
             new_image.SetMetaData(key, self.image.GetMetaData(key))
-        
-        # Save the new image to the edited file path
         sitk.WriteImage(new_image, edited_file_path)
         print(f'Saved edited image to {edited_file_path}')
 
-# Example usage
-file_path = r'seq_UT_Bharat_Bilateral_Falx_Bmode.mha'
-MhaSlideshow(file_path, interval=5)  # Set interval to 10 milliseconds
+    def toggle_pause(self, event):
+        self.paused = not self.paused
+        self.pause_button.label.set_text('Play' if self.paused else 'Pause')
+
+    def prev_frame(self, event):
+        self.paused = True
+        self.current_frame = (self.current_frame - 1) % self.num_frames
+        self.update_frame()
+
+    def next_frame(self, event):
+        self.paused = True
+        self.current_frame = (self.current_frame + 1) % self.num_frames
+        self.update_frame()
+
+    def on_click(self, event):
+        if event.inaxes == self.ax1:
+            if len(self.points) < 3:
+                self.points.append((int(event.xdata), int(event.ydata)))
+                if len(self.points) == 3:
+                    self.process_all_frames()
+                    self.ax1.set_title(f'Original Frame {self.current_frame + 1}')
+                    self.ax2.set_title(f'Edited Frame {self.current_frame + 1}')
+                    self.img2.set_data(self.edited_image_array[self.current_frame])
+                    self.update_frame()
+            else:
+                self.points = [(int(event.xdata), int(event.ydata))]  # Reset and start over if clicking after three points
+
+                
+file_path = r'seq_Dell_Vivid_Bharat_bilateral_falx_ventricles_D16_Bmode_config.mha'
+MhaSlideshow(file_path, interval=50)  # Set interval to 500 milliseconds
+'''
+VolumeReconstructor.exe --config-file=C:\D\PlusB-bin\PlusLibData\ConfigFiles\CerebroSonic\scripts\seq_Dell_Vivid_Bharat_bilateral_falx_ventricles_D16_Bmode_config.xml --image-to-reference-transform=ImageToReference --source-seq-file=C:\D\PlusB-bin\PlusLibData\ConfigFiles\CerebroSonic\scripts\seq_Dell_Vivid_Bharat_bilateral_falx_ventricles_D16_Bmode_config_edited.mha --output-volume-file=C:\D\PlusB-bin\PlusLibData\ConfigFiles\CerebroSonic\scripts\vol_Dell_Vivid_Bharat_bilateral_falx_ventricles_D16_Bmode_config_edited.mha
+
+'''
